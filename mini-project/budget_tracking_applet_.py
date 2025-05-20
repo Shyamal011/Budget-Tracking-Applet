@@ -63,16 +63,87 @@ class user_account:
             r_a = 'n'
 
     def display_user_details(self):
-        #Saumil-->Display user details
-        pass
+        self.file.seek(0)  # Go to the beginning of the file
+        print("\n--- USER ACCOUNT DETAILS ---")
+        for line in self.file:
+            print(line.strip())
+        print("----------------------------\n")
+        
 
     def change_user_details(self):
-        #Saumil-->Change user details
-        pass
+        self.file.seek(0)
+        lines = self.file.readlines()
+
+        details = {}
+        for line in lines:
+            if ':' in line:
+                key, value = line.strip().split(':', 1)
+                details[key.strip()] = value.strip()
+
+        print("\nWhich detail would you like to change?")
+        print("1. Password")
+        print("2. Name")
+        print("3. Bank Account Number")
+        choice = input("Enter choice: ")
+
+        if choice == '1':
+            new_password = input("Enter new alphanumerical password: ")
+            while not new_password.isalnum():
+                print("Invalid password! Use only letters and numbers.")
+                new_password = input("Enter new alphanumerical password: ")
+            details["Password"] = new_password
+
+        elif choice == '2':
+            new_name = input("Enter new full name: ")
+            details["Name"] = new_name
+
+        elif choice == '3':
+            new_bank_acc_no = str(int(input("Enter new bank account number: ")))
+            details["Bank Account Number"] = new_bank_acc_no
+
+        else:
+            print("Invalid choice!")
+            return
+
+        # Rewrite updated details
+        self.file.seek(0)
+        self.file.truncate(0)  # Clear the file
+        for key in ["Username", "Password", "Name", "Bank Account Number"]:
+            self.file.write(f"{key}: {details[key]}\n")
+
+        self.file.flush()
+        print("\nUser details updated successfully!\n")
 
     def remove_user(self):
-        #Saumil-->Remove user(delete account)
-        pass
+        confirm = input("Are you sure you want to delete your account? (y/n): ").lower()
+        if confirm != 'y':
+            print("Account deletion canceled.")
+            return
+
+        # Close open files first
+        self.close()
+
+        # Delete account-related files
+        try:
+            os.remove(self.acc_file_path)
+            os.remove(self.trnsctn_file_path)
+            if os.path.exists(self.report_file_path):
+                os.remove(self.report_file_path)
+        except Exception as e:
+            print(f"Error deleting files: {e}")
+            return
+
+        # Remove from global dictionaries
+        if self.username in user_names:
+            del user_names[self.username]
+        if self.username in user_list:
+            del user_list[self.username]
+
+        # Save the updated user list
+        save_user_data()
+
+        print("Your account and all associated data have been permanently deleted.\nThank you for using our applet.")
+        end()
 
     def close(self):
         self.file.close()
@@ -111,8 +182,37 @@ def menu(r):
             else:
                 #Shashwat-->Report and analysis
                 pass
-        #elif j =='1':
-        #   Saumil--> ADD
+        
+        elif j =='1':
+            t_type = input("Enter type (income / expense): ").strip().lower()
+            if t_type not in ['income', 'expense']:
+                print("Invalid type! Must be 'income' or 'expense'.")
+                return
+
+            category = input("Enter category (e.g., salary, food, bills): ")
+            amount = input("Enter amount: ")
+            try:
+                amount = float(amount)
+            except ValueError:
+                print("Amount must be a number.")
+                return
+
+            # Make expenses negative
+            if t_type == 'expense':
+                amount = -abs(amount)
+            else:
+                amount = abs(amount)
+
+            description = input("Enter short description (optional): ")
+    
+            import datetime
+            date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+            expense_entry = f"{date}, {t_type}, {category}, {amount}, {description}\n"
+            r.trnsctn.write(expense_entry)
+            r.trnsctn.flush()
+
+            print("Transaction recorded successfully!")
         #elif j =='2':
         #   Stuti--> TRACK
         #elif j =='3':
