@@ -28,6 +28,7 @@ def save_user_data():
 class user_account:
     def __init__(self, username, init_files=True):
         self.username = username
+        self.r_a = 'n'
         x = os.getcwd()
         self.acc_file_path = os.path.join(x, f"{self.username}_acc_details.txt")
         self.trnsctn_file_path = os.path.join(x, f"{self.username}_trnsctn_history.txt")
@@ -52,15 +53,14 @@ class user_account:
         details = f"Username: {self.username}\nPassword: {password}\nName: {name}\nBank Account Number: {bank_acc_no}"
         self.file.write(details)
 
-        global r_a
-        r_a = input("Enter y to access report and analysis of files: ")
-        if r_a == 'y':
+        self.r_a = input("Enter y to access report and analysis of files: ")
+        if self.r_a == 'y':
             print("Account has been created successfully!\nCongratulations!!")
         else:
             print("Account has been created successfully!\nCongratulations!!")
             self.report.close()
             os.remove(self.report_file_path)
-            r_a = 'n'
+            self.r_a = 'n'
 
     def display_user_details(self):
         self.file.seek(0)  # Go to the beginning of the file
@@ -148,7 +148,7 @@ class user_account:
     def close(self):
         self.file.close()
         self.trnsctn.close()
-        if r_a == 'y':
+        if self.r_a == 'y':
             self.report.close()
 
 def menu(r):
@@ -177,7 +177,7 @@ def menu(r):
         print("4. Report and analysis")
         j = input("Enter choice: ")
         if j == '4':
-            if r_a == 'n':
+            if r.r_a == 'n':
                 print("You have opted not to have report and analysis for the given account.")
             else:
                 #Shashwat-->Report and analysis
