@@ -1,9 +1,3 @@
-#define functions preferably within user_account class because it will be easier to access the path names for different files
-"""Try to complete the entire program by 4 o'clock p.m.(1600), Sunday, 18.05.2025. I will create report and send it back to you for revision
-   by Sunday midnight. Do let me know if there are any mistakes from my end and correct them by yourself if you can. 
-   Thank you,
-   Yours faithfully,
-   Shyamal"""
 import os
 
 user_names = {}
@@ -120,37 +114,6 @@ class user_account:
         self.file.flush()
         print("\nUser details updated successfully!\n")
 
-    def remove_user(self):
-        confirm = input("Are you sure you want to delete your account? (y/n): ").lower()
-        if confirm != 'y':
-            print("Account deletion canceled.")
-            return
-
-        # Close open files first
-        self.close()
-
-        # Delete account-related files
-        try:
-            os.remove(self.acc_file_path)
-            os.remove(self.trnsctn_file_path)
-            if os.path.exists(self.report_file_path):
-                os.remove(self.report_file_path)
-        except Exception as e:
-            print(f"Error deleting files: {e}")
-            return
-
-        # Remove from global dictionaries
-        if self.username in user_names:
-            del user_names[self.username]
-        if self.username in user_list:
-            del user_list[self.username]
-
-        # Save the updated user list
-        save_user_data()
-
-        print("Your account and all associated data have been permanently deleted.\nThank you for using our applet.")
-        end()
-
     def track_expenses(self):
         self.trnsctn.seek(0)
         print("\n--- Transaction History ---")
@@ -171,7 +134,6 @@ class user_account:
             print("No budget set. Please set your monthly budget first.")
             return
         menu(self)
-
 
     def compare_budget(self):
         try:
@@ -210,9 +172,8 @@ def menu(r):
     print("2. Expenses history")
     print("3. Add/Change budget goal")
     print("4. Check budget status")
-    print("5. Analysis of user expenses")
-    print("6. Account settings")
-    print("7. Exit")
+    print("5. Account settings")
+    print("6. Exit")
     i = str(input("Enter choice: "))
     if i == '1':
         t_type = input("Enter type (income / expense): ").strip().lower()
@@ -252,26 +213,20 @@ def menu(r):
     elif i == '4':
         r.compare_budget()
     elif i == '5':
-        #Shashwat-->Report and analysis
-        pass
-    elif i == '6':
         print("1. Display user details")
         print("2. Change user details")
-        print("3. Remove user details")
-        print("4. Go back to menu")
+        print("3. Go back to menu")
         j = input("Enter choice: ")
         if j == '1':
             r.display_user_details()
         elif j == '2':
             r.change_user_details()
         elif j == '3':
-            r.remove_user()
-        elif j == '4':
             menu(r)
         else:
             end()
         menu(r)
-    elif i == '7':
+    elif i == '6':
         end()
     else:
         print("Invalid choice!")
