@@ -27,16 +27,15 @@ class user_account:
         self.acc_file_path = os.path.join(x, f"{self.username}_acc_details.txt")
         self.trnsctn_file_path = os.path.join(x, f"{self.username}_trnsctn_history.txt")
         self.budget_file_path = os.path.join(x, f"{self.username}_budget.txt")
-        self.report_file_path = os.path.join(x, f"{self.username}_report.xlsx")
 
         if init_files:
             self.file = open(self.acc_file_path, "w+")
             self.trnsctn = open(self.trnsctn_file_path, "w+")
-            self.report = open(self.report_file_path, "w+")
+            self.budget = open(self.budget_file_path, "w+")
         else:
             self.file = open(self.acc_file_path, "r+")
             self.trnsctn = open(self.trnsctn_file_path, "a+")
-            self.report = open(self.report_file_path, "a+")
+            self.budget = open(self.budget_file_path, "a+")
 
     def create_account(self): 
         password = str(input("Enter password containing alphanumerical characters: "))
@@ -59,8 +58,6 @@ class user_account:
         details = f"Username: {self.username}\nPassword: {password}\nName: {name}\nBank Account Number: {bank_acc_no}"
         self.file.write(details)
         print("Account has been created successfully!\nCongratulations!")
-        self.report.close()
-        os.remove(self.report_file_path)
 
     def display_user_details(self):
         self.file.seek(0)  # Go to the beginning of the file
