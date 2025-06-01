@@ -188,10 +188,10 @@ class user_account:
             print("Good job! You are within your budget.")
         menu(self)
 
-        def close(self):
-            self.file.close()
-            self.trnsctn.close()
-            self.report.close()
+    def close(self):
+        self.file.close()
+        self.trnsctn.close()
+        self.report.close()
 
 def menu(r):
     print("MENU")
@@ -233,7 +233,7 @@ def menu(r):
         r.trnsctn.flush()
 
         print("Transaction recorded successfully!")
-        menu(self)
+        menu(r)
     elif i == '2':
         r.track_expenses()
     elif i == '3':
@@ -256,15 +256,15 @@ def menu(r):
         elif j == '3':
             r.remove_user()
         elif j == '4':
-            menu(self)
+            menu(r)
         else:
             end()
-        menu(self)
+        menu(r)
     elif i == '7':
         end()
     else:
         print("Invalid choice!")
-        menu(self)
+        menu(r)
 
 def end():
     print("Thank you for using the applet!\nVisit us again!")
