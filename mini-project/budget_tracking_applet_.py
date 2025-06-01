@@ -50,7 +50,18 @@ class user_account:
             print("Password contains special characters!")
             password = str(input("Enter password containing alphanumerical characters: "))
         name = str(input("Enter your full name: "))
-        bank_acc_no = str(int(input("Enter bank account number: ")))
+        try:
+            bank_acc_no = str(int(input("Enter bank account number: ")))
+        except:
+            print("Invalid bank account number!!")
+            n=False
+        while(n==False):
+           print("Try again!")
+           try:
+               bank_acc_no = str(int(input("Enter bank account number: ")))
+               break
+           except:
+               print("Invalid bank account number!!")
         details = f"Username: {self.username}\nPassword: {password}\nName: {name}\nBank Account Number: {bank_acc_no}"
         self.file.write(details)
         print("Account has been created successfully!\nCongratulations!")
@@ -283,7 +294,7 @@ def start():
             with open(user_names[user_name], "r") as f:
                 for line in f:
                     if line.startswith("Password: "):
-                        password = line.strip().split(":")[1].strip()
+                        password = line.strip().split(": ")[1].strip()
                         if g_password == password:
                             print("Login successful!")
                             a = user_list[user_name]
@@ -302,6 +313,7 @@ def start():
         user_names[user_name] = r.acc_file_path
         user_list[user_name] = r
         save_user_data()
+        start()
     else:
         end()
 
