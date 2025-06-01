@@ -32,6 +32,7 @@ class user_account:
         x = os.getcwd()
         self.acc_file_path = os.path.join(x, f"{self.username}_acc_details.txt")
         self.trnsctn_file_path = os.path.join(x, f"{self.username}_trnsctn_history.txt")
+        self.budget_file_path = os.path.join(x, f"{self.username}_budget.txt")
         self.report_file_path = os.path.join(x, f"{self.username}_report.xlsx")
 
         if init_files:
@@ -52,15 +53,9 @@ class user_account:
         bank_acc_no = str(int(input("Enter bank account number: ")))
         details = f"Username: {self.username}\nPassword: {password}\nName: {name}\nBank Account Number: {bank_acc_no}"
         self.file.write(details)
-
-        self.r_a = input("Enter y to access report and analysis of files: ")
-        if self.r_a == 'y':
-            print("Account has been created successfully!\nCongratulations!!")
-        else:
-            print("Account has been created successfully!\nCongratulations!!")
-            self.report.close()
-            os.remove(self.report_file_path)
-            self.r_a = 'n'
+        print("Account has been created successfully!\nCongratulations!")
+        self.report.close()
+        os.remove(self.report_file_path)
 
     def display_user_details(self):
         self.file.seek(0)  # Go to the beginning of the file
@@ -145,22 +140,114 @@ class user_account:
         print("Your account and all associated data have been permanently deleted.\nThank you for using our applet.")
         end()
 
-    def close(self):
-        self.file.close()
-        self.trnsctn.close()
-        if self.r_a == 'y':
+    def track_expenses(self):
+        self.trnsctn.seek(0)
+        print("\n--- Transaction History ---")
+        for line in self.trnsctn:
+            print(line.strip())
+        print("----------------------------\n")
+        menu(self)
+
+    def set_budget(self):
+        try:
+            goal = float(input("Set your monthly budget limit: "))
+            with open(self.budget_file_path, "w") as f:
+                f.write(str(goal))
+            print(f"Monthly budget set to: {goal}")
+        except ValueError:
+            print("Invalid input. Please enter a number.")
+        if not os.path.exists(self.budget_file_path):
+            print("No budget set. Please set your monthly budget first.")
+            return
+        menu(self)
+
+
+    def compare_budget(self):
+        try:
+            with open(self.budget_file_path, "r") as f:
+                budget = float(f.read().strip())
+        except ValueError:
+            print("Something went wrong. Please reset your budget.")
+            return
+        self.trnsctn.seek(0)
+        total_expense = 0.0
+        for line in self.trnsctn:
+            parts = line.strip().split(",")
+            if len(parts) >= 4:
+                try:
+                    amount = float(parts[3].strip())
+                    if amount < 0:
+                        total_expense += abs(amount)
+                except ValueError:
+                    continue
+        print(f"\nYour set monthly budget: {budget}")
+        print(f"Total expenses so far: {total_expense}")
+        if total_expense > budget:
+            print("Warning: You have exceeded your budget!")
+        else:
+            print("Good job! You are within your budget.")
+        menu(self)
+
+        def close(self):
+            self.file.close()
+            self.trnsctn.close()
             self.report.close()
 
 def menu(r):
     print("MENU")
-    print("1. USER DETAILS")
-    print("2. BUDGET DETAILS")
-    print("3. EXIT")
+    print("1. Add expense")
+    print("2. Expenses history")
+    print("3. Add/Change budget goal")
+    print("4. Check budget status")
+    print("5. Analysis of user expenses")
+    print("6. Account settings")
+    print("7. Exit")
     i = str(input("Enter choice: "))
     if i == '1':
+        t_type = input("Enter type (income / expense): ").strip().lower()
+        if t_type not in ['income', 'expense']:
+            print("Invalid type! Must be 'income' or 'expense'.")
+            return
+
+        category = input("Enter category (e.g., salary, food, bills): ")
+        amount = input("Enter amount: ")
+        try:
+            amount = float(amount)
+        except ValueError:
+            print("Amount must be a number.")
+            return
+
+        # Make expenses negative
+        if t_type == 'expense':
+             amount = -abs(amount)
+        else:
+            amount = abs(amount)
+
+        description = input("Enter short description (optional): ")
+    
+        import datetime
+        date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        expense_entry = f"{date}, {t_type}, {category}, {amount}, {description}\n"
+        r.trnsctn.write(expense_entry)
+        r.trnsctn.flush()
+
+        print("Transaction recorded successfully!")
+        menu(self)
+    elif i == '2':
+        r.track_expenses()
+    elif i == '3':
+        r.set_budget()
+    elif i == '4':
+        r.compare_budget()
+    elif i == '5':
+        #Shashwat-->Report and analysis
+        pass
+    elif i == '6':
         print("1. Display user details")
         print("2. Change user details")
         print("3. Remove user details")
+        print("4. Go back to menu")
         j = input("Enter choice: ")
         if j == '1':
             r.display_user_details()
@@ -168,60 +255,16 @@ def menu(r):
             r.change_user_details()
         elif j == '3':
             r.remove_user()
+        elif j == '4':
+            menu(self)
         else:
             end()
-    elif i == '2':
-        print("1. Add expense details")
-        print("2. Track expenses")
-        print("3. Make budget goals")
-        print("4. Report and analysis")
-        j = input("Enter choice: ")
-        if j == '4':
-            if r.r_a == 'n':
-                print("You have opted not to have report and analysis for the given account.")
-            else:
-                #Shashwat-->Report and analysis
-                pass
-        
-        elif j =='1':
-            t_type = input("Enter type (income / expense): ").strip().lower()
-            if t_type not in ['income', 'expense']:
-                print("Invalid type! Must be 'income' or 'expense'.")
-                return
-
-            category = input("Enter category (e.g., salary, food, bills): ")
-            amount = input("Enter amount: ")
-            try:
-                amount = float(amount)
-            except ValueError:
-                print("Amount must be a number.")
-                return
-
-            # Make expenses negative
-            if t_type == 'expense':
-                amount = -abs(amount)
-            else:
-                amount = abs(amount)
-
-            description = input("Enter short description (optional): ")
-    
-            import datetime
-            date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-            expense_entry = f"{date}, {t_type}, {category}, {amount}, {description}\n"
-            r.trnsctn.write(expense_entry)
-            r.trnsctn.flush()
-
-            print("Transaction recorded successfully!")
-        #elif j =='2':
-        #   Stuti--> TRACK
-        #elif j =='3':
-        #   Stuti--> BUDGET GOALS
-        #   print sub-menu for different budget goals, totally upto you, you may refer the flowchart
-        else:
-            end()
-    else:
+        menu(self)
+    elif i == '7':
         end()
+    else:
+        print("Invalid choice!")
+        menu(self)
 
 def end():
     print("Thank you for using the applet!\nVisit us again!")
@@ -229,34 +272,38 @@ def end():
 
 def start():       
     load_user_data()
-    user_name = str(input("Please enter your username: "))
-    if user_name in user_names:
-        g_password = str(input("Please enter your password: "))
-        with open(user_names[user_name], "r") as f:
-            for line in f:
-                if line.startswith("Password: "):
-                    password = line.strip().split(":")[1].strip()
-                    if g_password == password:
-                        print("Login successful!")
-                        a = user_list[user_name]
-                        menu(a)
-                        return
-                    else:
-                        print("Password incorrect!")
-                        return
-    else:
-        print("Username not found!\n")
-        y = input("Enter y to continue with new account creation: ")
-        if y == 'y':
-            print("You have chosen to create a new account!\n")
-            r = user_account(user_name)
-            r.create_account()
-            user_names[user_name] = r.acc_file_path
-            user_list[user_name] = r
-            save_user_data()
-            start()
+    print("1. Login")
+    print("2. Create account")
+    print("3. Exit")
+    ch = input("Enter your choice:")
+    if ch == '1':
+        user_name = str(input("Please enter your username: "))
+        if user_name in user_names:
+            g_password = str(input("Please enter your password: "))
+            with open(user_names[user_name], "r") as f:
+                for line in f:
+                    if line.startswith("Password: "):
+                        password = line.strip().split(":")[1].strip()
+                        if g_password == password:
+                            print("Login successful!")
+                            a = user_list[user_name]
+                            menu(a)
+                            return
+                        else:
+                            print("Password incorrect!")
+                            return
         else:
-            end()
+            print("Username not found!\n")
+            start()
+    elif ch == '2':
+        user_name = str(input("Please enter a username: "))
+        r = user_account(user_name)
+        r.create_account()
+        user_names[user_name] = r.acc_file_path
+        user_list[user_name] = r
+        save_user_data()
+    else:
+        end()
 
 print("Welcome to the budget-tracking applet!\n")
 start()
