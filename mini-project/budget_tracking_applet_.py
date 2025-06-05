@@ -20,9 +20,9 @@ def save_user_data():
             f.write(f"{username},{filepath}\n")
 
 class user_account:
+    n=True
     def __init__(self, username, init_files=True):
         self.username = username
-        self.r_a = 'n'
         x = os.getcwd()
         self.acc_file_path = os.path.join(x, f"{self.username}_acc_details.txt")
         self.trnsctn_file_path = os.path.join(x, f"{self.username}_trnsctn_history.txt")
@@ -57,7 +57,8 @@ class user_account:
                print("Invalid bank account number!!")
         details = f"Username: {self.username}\nPassword: {password}\nName: {name}\nBank Account Number: {bank_acc_no}"
         self.file.write(details)
-        print("Account has been created successfully!\nCongratulations!")
+        print("Account has been created successfully!\nCongratulations!\nPlease exit and re-run the program to login to the created account! ")
+        exit
 
     def display_user_details(self):
         self.file.seek(0)  # Go to the beginning of the file
